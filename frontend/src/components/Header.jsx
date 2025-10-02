@@ -17,12 +17,12 @@ const Header = () => {
     <header className="bg-white shadow-md sticky top-0 z-50">
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
-          <Link to="/" className="flex items-center space-x-2 text-2xl font-bold text-primary">
+          <Link to="/" className="flex items-center text-2xl font-bold text-primary">
             <img src="/logo.png" alt="JustFoodies" className="h-8 w-8" />
-            <span>JustFoodies</span>
+            <span className="ml-2 hidden sm:inline">JustFoodies</span>
           </Link>
 
-          <nav className="hidden md:flex items-center space-x-6">
+          <nav className="hidden lg:flex items-center space-x-6">
             <Link to="/" className="text-text hover:text-primary transition-colors">
               Home
             </Link>
@@ -68,7 +68,7 @@ const Header = () => {
                   className="flex items-center space-x-1 text-text hover:text-primary transition-colors"
                 >
                   <User size={20} />
-                  <span className="hidden md:inline">{user.name}</span>
+                  <span className="hidden sm:inline">{user.name}</span>
                 </Link>
                 <button 
                   onClick={handleLogout}

@@ -193,26 +193,10 @@ const Admin = () => {
                     <div className="flex space-x-2">
                       <button
                         onClick={() => setSelectedOrder(order)}
-                        className="text-blue-600 hover:text-blue-800"
+                        className="text-blue-600 hover:text-blue-800 px-2 py-1 rounded bg-blue-50"
                       >
                         <Eye size={16} />
                       </button>
-                      {order.status === 'PENDING' && (
-                        <button
-                          onClick={() => handleStatusUpdate(order.id, 'ACCEPTED')}
-                          className="text-green-600 hover:text-green-800"
-                        >
-                          <CheckCircle size={16} />
-                        </button>
-                      )}
-                      {order.status !== 'DELIVERED' && order.status !== 'CANCELLED' && (
-                        <button
-                          onClick={() => handleStatusUpdate(order.id, 'CANCELLED')}
-                          className="text-red-600 hover:text-red-800"
-                        >
-                          <XCircle size={16} />
-                        </button>
-                      )}
                     </div>
                   </td>
                 </tr>
