@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { useQuery } from 'react-query'
 import { Clock, CheckCircle, Truck, Package } from 'lucide-react'
-import axios from 'axios'
+import api from '../utils/api'
 import { io } from 'socket.io-client'
 
 const OrderTracking = () => {
@@ -11,14 +11,14 @@ const OrderTracking = () => {
 
   const { data: order, refetch } = useQuery(
     ['order', orderNumber],
-    () => axios.get(`/api/orders/${orderNumber}`).then(res => res.data),
+    () => api.get(`/api/orders/${orderNumber}`).then(res => res.data),
     {
       enabled: !!orderNumber
     }
   )
 
   useEffect(() => {
-    const newSocket = io('http://localhost:3000')
+    const newSocket = io(window.location.origin)
     setSocket(newSocket)
 
     newSocket.emit('join-order', orderNumber)

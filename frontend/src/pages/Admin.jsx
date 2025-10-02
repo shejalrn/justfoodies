@@ -23,6 +23,20 @@ const Admin = () => {
     api.get(`/api/admin/users?${userSearch ? `search=${userSearch}` : ''}`).then(res => res.data)
   )
 
+  const { data: contactsData } = useQuery('admin-contacts', () =>
+    api.get('/api/admin/contacts').then(res => res.data)
+  )
+
+  const updateContactMutation = useMutation(
+    ({ contactId, status }) => api.patch(`/api/admin/contacts/${contactId}/status`, { status }),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries('admin-contacts')
+        toast.success('Contact status updated')
+      }
+    }
+  )
+
   const updateStatusMutation = useMutation(
     ({ orderId, status, note }) => api.patch(`/api/admin/orders/${orderId}/status`, { status, note }),
     {
@@ -83,6 +97,12 @@ const Admin = () => {
           className={`pb-2 px-1 ${activeTab === 'users' ? 'border-b-2 border-primary text-primary' : 'text-gray-600'}`}
         >
           Users
+        </button>
+        <button
+          onClick={() => setActiveTab('contacts')}
+          className={`pb-2 px-1 ${activeTab === 'contacts' ? 'border-b-2 border-primary text-primary' : 'text-gray-600'}`}
+        >
+          Contacts
         </button>
       </div>
 
@@ -271,11 +291,6 @@ const Admin = () => {
                     <td className="py-3">
                       <div>
                         <p className="font-medium">{user._count.orders} orders</p>
-                        {user.orders?.length > 0 && (
-                          <p className="text-sm text-gray-600">
-                            Last: ₹{user.orders[0].totalAmount}
-                          </p>
-                        )}
                       </div>
                     </td>
                     <td className="py-3">
@@ -299,6 +314,74 @@ const Admin = () => {
           {usersData?.users?.length === 0 && (
             <div className="text-center py-8">
               <p className="text-gray-500">No users found.</p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Contacts Section */}
+      {activeTab === 'contacts' && (
+        <div className="card">
+          <h2 className="text-xl font-semibold mb-6">Contact Queries</h2>
+
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b">
+                  <th className="text-left py-3">Name</th>
+                  <th className="text-left py-3">Contact</th>
+                  <th className="text-left py-3">Subject</th>
+                  <th className="text-left py-3">Message</th>
+                  <th className="text-left py-3">Status</th>
+                  <th className="text-left py-3">Date</th>
+                  <th className="text-left py-3">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {contactsData?.contacts?.map(contact => (
+                  <tr key={contact.id} className="border-b hover:bg-gray-50">
+                    <td className="py-3 font-medium">{contact.name}</td>
+                    <td className="py-3">
+                      <div className="text-sm">
+                        <div>{contact.email}</div>
+                        <div className="text-gray-600">{contact.phone}</div>
+                      </div>
+                    </td>
+                    <td className="py-3">{contact.subject}</td>
+                    <td className="py-3">
+                      <div className="max-w-xs truncate" title={contact.message}>
+                        {contact.message}
+                      </div>
+                    </td>
+                    <td className="py-3">
+                      <select
+                        value={contact.status}
+                        onChange={(e) => updateContactMutation.mutate({ contactId: contact.id, status: e.target.value })}
+                        className="text-sm border rounded px-2 py-1"
+                      >
+                        <option value="NEW">New</option>
+                        <option value="READ">Read</option>
+                        <option value="REPLIED">Replied</option>
+                        <option value="CLOSED">Closed</option>
+                      </select>
+                    </td>
+                    <td className="py-3 text-sm text-gray-600">
+                      {new Date(contact.createdAt).toLocaleDateString()}
+                    </td>
+                    <td className="py-3">
+                      <a href={`mailto:${contact.email}`} className="text-blue-600 hover:text-blue-800 text-sm">
+                        Reply
+                      </a>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {contactsData?.contacts?.length === 0 && (
+            <div className="text-center py-8">
+              <p className="text-gray-500">No contact queries found.</p>
             </div>
           )}
         </div>

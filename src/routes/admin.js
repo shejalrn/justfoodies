@@ -58,6 +58,70 @@ router.get('/dashboard', async (req, res) => {
   }
 });
 
+// Get contact queries
+router.get('/contacts', [
+  query('page').optional().isInt({ min: 1 }),
+  query('limit').optional().isInt({ min: 1, max: 100 }),
+  query('status').optional().isString()
+], async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const { page = 1, limit = 20, status } = req.query;
+    const skip = (page - 1) * limit;
+
+    const where = {
+      ...(status && { status })
+    };
+
+    const [contacts, total] = await Promise.all([
+      prisma.contact.findMany({
+        where,
+        orderBy: { createdAt: 'desc' },
+        skip: parseInt(skip),
+        take: parseInt(limit)
+      }),
+      prisma.contact.count({ where })
+    ]);
+
+    res.json({
+      contacts,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total,
+        pages: Math.ceil(total / limit)
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch contacts' });
+  }
+});
+
+// Update contact status
+router.patch('/contacts/:id/status', [
+  body('status').isIn(['NEW', 'READ', 'REPLIED', 'CLOSED']).withMessage('Invalid status')
+], async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const contact = await prisma.contact.update({
+      where: { id: parseInt(req.params.id) },
+      data: { status: req.body.status }
+    });
+
+    res.json(contact);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to update contact status' });
+  }
+});
+
 // Get all users
 router.get('/users', [
   query('page').optional().isInt({ min: 1 }),
@@ -88,30 +152,9 @@ router.get('/users', [
         where,
         include: {
           addresses: true,
-          orders: {
-            select: {
-              id: true,
-              totalAmount: true,
-              status: true,
-              createdAt: true
-            },
-            orderBy: { createdAt: 'desc' },
-            take: 5
-          },
           _count: {
             select: { orders: true }
           }
-        },
-        select: {
-          id: true,
-          name: true,
-          phone: true,
-          email: true,
-          role: true,
-          createdAt: true,
-          addresses: true,
-          orders: true,
-          _count: true
         },
         orderBy: { createdAt: 'desc' },
         skip: parseInt(skip),

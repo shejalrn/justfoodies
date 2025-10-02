@@ -13,6 +13,7 @@ const userRoutes = require('./routes/users');
 const adminRoutes = require('./routes/admin');
 const webhookRoutes = require('./routes/webhooks');
 const sanityRoutes = require('./routes/sanity');
+const contactRoutes = require('./routes/contact');
 const { setupSocketHandlers } = require('./services/socketService');
 
 const app = express();
@@ -57,6 +58,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/webhooks', webhookRoutes);
 app.use('/api/sanity', sanityRoutes);
+app.use('/api/contact', contactRoutes);
 
 // Health check
 app.get('/health', (req, res) => {
