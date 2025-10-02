@@ -109,12 +109,16 @@ const Menu = () => {
                     src={item.image} 
                     alt={item.title}
                     className="w-full h-full object-cover rounded-lg"
+                    onError={(e) => {
+                      console.log('Image failed to load:', item.image);
+                      e.target.style.display = 'none';
+                      e.target.nextSibling.style.display = 'flex';
+                    }}
                   />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-gray-400">
-                    No Image
-                  </div>
-                )}
+                ) : null}
+                <div className="w-full h-full flex items-center justify-center text-gray-400" style={{display: item.image ? 'none' : 'flex'}}>
+                  No Image
+                </div>
               </div>
             </Link>
             

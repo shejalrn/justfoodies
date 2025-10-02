@@ -10,7 +10,10 @@ const client = createClient({
 });
 
 const builder = imageUrlBuilder(client);
-const urlFor = (source) => builder.image(source);
+const urlFor = (source) => {
+  if (!source) return null;
+  return builder.image(source).auto('format').fit('max');
+};
 
 // Test connection
 client.fetch('*[_type == "category"][0]')
