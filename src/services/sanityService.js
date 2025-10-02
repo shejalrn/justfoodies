@@ -11,8 +11,13 @@ const client = createClient({
 
 const builder = imageUrlBuilder(client);
 const urlFor = (source) => {
-  if (!source) return null;
-  return builder.image(source).auto('format').fit('max');
+  if (!source || !source.asset) return null;
+  try {
+    return builder.image(source).auto('format').fit('max').quality(80);
+  } catch (error) {
+    console.error('Error building image URL:', error);
+    return null;
+  }
 };
 
 // Test connection
@@ -32,7 +37,7 @@ const getCategories = async () => {
   const categories = await client.fetch(query);
   return categories.map(cat => ({
     ...cat,
-    image: cat.image ? urlFor(cat.image).width(400).height(300).url() : null
+    image: cat.image ? urlFor(cat.image)?.width(400).height(300).url() : null
   }));
 };
 
@@ -74,8 +79,8 @@ const getMenuItems = async (filters = {}) => {
   const items = await client.fetch(query);
   return items.map(item => ({
     ...item,
-    image: item.image ? urlFor(item.image).width(600).height(400).url() : null,
-    gallery: item.gallery ? item.gallery.map(img => urlFor(img).width(800).height(600).url()) : []
+    image: item.image ? urlFor(item.image)?.width(600).height(400).url() : null,
+    gallery: item.gallery ? item.gallery.map(img => urlFor(img)?.width(800).height(600).url()).filter(Boolean) : []
   }));
 };
 
@@ -104,8 +109,8 @@ const getMenuItem = async (slug) => {
   
   return {
     ...item,
-    image: item.image ? urlFor(item.image).width(800).height(600).url() : null,
-    gallery: item.gallery ? item.gallery.map(img => urlFor(img).width(1200).height(800).url()) : []
+    image: item.image ? urlFor(item.image)?.width(800).height(600).url() : null,
+    gallery: item.gallery ? item.gallery.map(img => urlFor(img)?.width(1200).height(800).url()).filter(Boolean) : []
   };
 };
 
