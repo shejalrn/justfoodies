@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { MapPin, Phone, Mail, Clock } from 'lucide-react'
 import toast from 'react-hot-toast'
+import SEO from '../components/SEO'
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -43,6 +44,11 @@ const Contact = () => {
 
   return (
     <div>
+      <SEO 
+        title="Contact Us - JustFoodies"
+        description="Get in touch with JustFoodies cloud kitchen. Contact us for orders, feedback, or corporate catering. Phone: +91 97678 56258, Email: infoatjustfood@gmail.com"
+        keywords="contact justfoodies, cloud kitchen contact, pune food delivery contact, customer support, corporate catering contact"
+      />
       {/* Hero Section */}
       <section className="bg-primary text-white py-16">
         <div className="container mx-auto px-4 text-center">

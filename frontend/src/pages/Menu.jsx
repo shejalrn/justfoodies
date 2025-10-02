@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom'
 import api from '../utils/api'
 import { useCart } from '../utils/CartContext'
 import toast from 'react-hot-toast'
+import SEO from '../components/SEO'
 
 const Menu = () => {
   const [selectedCategory, setSelectedCategory] = useState('')
@@ -43,6 +44,11 @@ const Menu = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
+      <SEO 
+        title="Menu - JustFoodies"
+        description="Browse our delicious menu with authentic Indian cuisine. Veg and non-veg options available with fresh ingredients and traditional recipes."
+        keywords="menu, indian food, veg food, non veg food, thali, biryani, curry, roti, rice, pune food delivery"
+      />
       <h1 className="text-3xl font-bold mb-8">Our Menu</h1>
 
       {/* Filters */}

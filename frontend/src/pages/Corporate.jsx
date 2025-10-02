@@ -1,8 +1,14 @@
 import { Building, Users, Calendar, CheckCircle } from 'lucide-react'
+import SEO from '../components/SEO'
 
 const Corporate = () => {
   return (
     <div>
+      <SEO 
+        title="Corporate Catering - JustFoodies"
+        description="Professional corporate catering services in Pune. Office meals, event catering, and bulk orders with customized menus and reliable delivery."
+        keywords="corporate catering pune, office meals, event catering, bulk food orders, business catering, corporate lunch"
+      />
       {/* Hero Section */}
       <section className="bg-primary text-white py-16">
         <div className="container mx-auto px-4 text-center">

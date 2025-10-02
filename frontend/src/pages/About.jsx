@@ -1,8 +1,14 @@
 import { Users, Award, Clock, Heart } from 'lucide-react'
+import SEO from '../components/SEO'
 
 const About = () => {
   return (
     <div>
+      <SEO 
+        title="About Us - JustFoodies"
+        description="Learn about JustFoodies cloud kitchen story. Founded in 2008, we bring authentic Indian cuisine with traditional recipes and modern technology."
+        keywords="about justfoodies, cloud kitchen story, indian cuisine, authentic food, pune restaurant, food quality"
+      />
       {/* Hero Section */}
       <section className="bg-primary text-white py-16">
         <div className="container mx-auto px-4 text-center">

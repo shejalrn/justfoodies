@@ -4,6 +4,7 @@ import { useQuery } from 'react-query'
 import api from '../utils/api'
 import { useCart } from '../utils/CartContext'
 import toast from 'react-hot-toast'
+import SEO from '../components/SEO'
 
 const Home = () => {
   const { addItem } = useCart()
@@ -25,6 +26,11 @@ const Home = () => {
   }
   return (
     <div>
+      <SEO 
+        title="JustFoodies - Cloud Kitchen | Fresh Food Delivery in Pune"
+        description="Order fresh, delicious food from JustFoodies Cloud Kitchen. Fast delivery in Pune with authentic flavors and quality ingredients. Free delivery available."
+        keywords="cloud kitchen pune, food delivery pune, online food order, fresh food, home delivery, indian food, veg food, non veg food, lohegaon, wagholi, kharadi, viman nagar"
+      />
       {/* Hero Section */}
       <section className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white">
         <div className="container mx-auto px-4">

@@ -31,10 +31,10 @@ app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "'unsafe-inline'", "https://static.cloudflareinsights.com"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "https://static.cloudflareinsights.com", "https://www.googletagmanager.com", "https://www.google-analytics.com"],
       styleSrc: ["'self'", "'unsafe-inline'"],
       imgSrc: ["'self'", "data:", "https:", "http:"],
-      connectSrc: ["'self'", "https:", "wss:"],
+      connectSrc: ["'self'", "https:", "wss:", "https://www.google-analytics.com", "https://analytics.google.com"],
       fontSrc: ["'self'", "https:", "data:"],
       objectSrc: ["'none'"],
       mediaSrc: ["'self'"],
