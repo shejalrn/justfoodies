@@ -58,14 +58,21 @@ router.get('/test', async (req, res) => {
       apiVersion: '2023-05-03'
     });
     
+    // Check what data exists
+    const allData = await client.fetch('*[_type in ["category", "menuItem"]][0...5] { _type, _id, title, image }');
     const categories = await client.fetch('*[_type == "category"][0...2]');
     const menuItems = await client.fetch('*[_type == "menuItem"][0...2] { _id, title, image, "imageUrl": image.asset->url }');
     
     res.json({ 
       status: 'success', 
       message: 'Sanity connection working',
+      allData,
       categories,
       menuItems,
+      dataCount: {
+        categories: categories.length,
+        menuItems: menuItems.length
+      },
       config: {
         projectId: process.env.SANITY_PROJECT_ID || 'ybaq07b6',
         dataset: process.env.SANITY_DATASET || 'production',

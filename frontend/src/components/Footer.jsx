@@ -9,9 +9,7 @@ const Footer = () => {
           {/* Company Info */}
           <div>
             <div className="flex items-center space-x-2 mb-4">
-              <div className="h-8 w-8 bg-primary rounded-full flex items-center justify-center text-white font-bold text-sm">
-                JF
-              </div>
+              <img src="/logo.png" alt="JustFoodies" className="h-10 w-auto" />
               <h3 className="text-xl font-bold">JustFoodies</h3>
             </div>
             <p className="text-gray-300 mb-4">

@@ -17,11 +17,8 @@ const Header = () => {
     <header className="bg-white shadow-md sticky top-0 z-50">
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
-          <Link to="/" className="flex items-center text-2xl font-bold text-primary">
-            <div className="h-8 w-8 bg-primary rounded-full flex items-center justify-center text-white font-bold text-sm">
-              JF
-            </div>
-            <span className="ml-2 hidden sm:inline">JustFoodies</span>
+          <Link to="/" className="flex items-center">
+            <img src="/logo.png" alt="JustFoodies" className="h-16 w-auto" />
           </Link>
 
           <nav className="hidden lg:flex items-center space-x-6">

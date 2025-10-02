@@ -21,7 +21,7 @@ const About = () => {
             <div>
               <h2 className="text-3xl font-bold mb-6">Our Story</h2>
               <p className="text-gray-600 mb-4">
-                Founded in 2024, JustFoodies started with a simple mission: to make delicious, 
+                Founded in 2008, JustFoodies started with a simple mission: to make delicious, 
                 authentic Indian food accessible to everyone. We believe that great food brings people together.
               </p>
               <p className="text-gray-600 mb-4">
