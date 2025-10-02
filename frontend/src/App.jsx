@@ -18,6 +18,7 @@ import PrivacyPolicy from './pages/PrivacyPolicy'
 import TermsOfService from './pages/TermsOfService'
 import RefundPolicy from './pages/RefundPolicy'
 import ShippingPolicy from './pages/ShippingPolicy'
+import Admin from './pages/Admin'
 
 function App() {
   return (
@@ -42,6 +43,7 @@ function App() {
               <Route path="/terms-of-service" element={<TermsOfService />} />
               <Route path="/refund-policy" element={<RefundPolicy />} />
               <Route path="/shipping-policy" element={<ShippingPolicy />} />
+              <Route path="/admin" element={<Admin />} />
             </Routes>
           </main>
           <Footer />

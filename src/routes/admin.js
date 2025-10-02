@@ -58,6 +58,82 @@ router.get('/dashboard', async (req, res) => {
   }
 });
 
+// Get all users
+router.get('/users', [
+  query('page').optional().isInt({ min: 1 }),
+  query('limit').optional().isInt({ min: 1, max: 100 }),
+  query('search').optional().isString()
+], async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const { page = 1, limit = 20, search } = req.query;
+    const skip = (page - 1) * limit;
+
+    const where = {
+      ...(search && {
+        OR: [
+          { name: { contains: search, mode: 'insensitive' } },
+          { phone: { contains: search } },
+          { email: { contains: search, mode: 'insensitive' } }
+        ]
+      })
+    };
+
+    const [users, total] = await Promise.all([
+      prisma.user.findMany({
+        where,
+        include: {
+          addresses: true,
+          orders: {
+            select: {
+              id: true,
+              totalAmount: true,
+              status: true,
+              createdAt: true
+            },
+            orderBy: { createdAt: 'desc' },
+            take: 5
+          },
+          _count: {
+            select: { orders: true }
+          }
+        },
+        select: {
+          id: true,
+          name: true,
+          phone: true,
+          email: true,
+          role: true,
+          createdAt: true,
+          addresses: true,
+          orders: true,
+          _count: true
+        },
+        orderBy: { createdAt: 'desc' },
+        skip: parseInt(skip),
+        take: parseInt(limit)
+      }),
+      prisma.user.count({ where })
+    ]);
+
+    res.json({
+      users,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total,
+        pages: Math.ceil(total / limit)
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch users' });
+  }
+});
+
 // Get all orders with filters
 router.get('/orders', [
   query('status').optional().isIn(Object.values(ORDER_STATUSES)),

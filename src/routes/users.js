@@ -67,7 +67,7 @@ router.post('/register', [
 
 // Login user
 router.post('/login', [
-  body('phone').isMobilePhone('en-IN').withMessage('Valid phone number required'),
+  body('phone').notEmpty().withMessage('Phone/Email is required'),
   body('password').notEmpty().withMessage('Password is required')
 ], async (req, res) => {
   try {
@@ -82,8 +82,10 @@ router.post('/login', [
 
     const { phone, password } = req.body;
 
-    const user = await prisma.user.findUnique({
-      where: { phone }
+    // Check if input is email or phone
+    const isEmail = phone.includes('@');
+    const user = await prisma.user.findFirst({
+      where: isEmail ? { email: phone } : { phone }
     });
 
     if (!user || !user.password) {

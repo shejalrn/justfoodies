@@ -55,6 +55,14 @@ const Header = () => {
 
             {user ? (
               <div className="flex items-center space-x-2">
+                {user.role === 'ADMIN' && (
+                  <Link 
+                    to="/admin" 
+                    className="text-text hover:text-primary transition-colors font-medium"
+                  >
+                    Admin
+                  </Link>
+                )}
                 <Link 
                   to="/profile" 
                   className="flex items-center space-x-1 text-text hover:text-primary transition-colors"

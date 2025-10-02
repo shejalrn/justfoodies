@@ -78,14 +78,26 @@ async function main() {
   });
 
   // Create admin user
-  const hashedPassword = await bcrypt.hash('admin123', 10);
+  const adminPassword = await bcrypt.hash('Justfood@2025', 10);
   await prisma.user.create({
     data: {
-      name: 'Admin User',
-      phone: '9999999999',
-      email: 'admin@justfoodie.com',
-      password: hashedPassword,
+      name: 'Admin',
+      phone: '7038258837',
+      email: 'admin@justfoodies.in',
+      password: adminPassword,
       role: 'ADMIN'
+    }
+  });
+
+  // Create test user
+  const userPassword = await bcrypt.hash('ranjeet123', 10);
+  await prisma.user.create({
+    data: {
+      name: 'Ranjeet Shejal',
+      phone: '9175231409',
+      email: 'rajshejal22@gmail.com',
+      password: userPassword,
+      role: 'USER'
     }
   });
 

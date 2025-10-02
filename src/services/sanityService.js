@@ -1,4 +1,5 @@
 const { createClient } = require('@sanity/client');
+const imageUrlBuilder = require('@sanity/image-url');
 
 const client = createClient({
   projectId: process.env.SANITY_PROJECT_ID || 'ybaq07b6',
@@ -7,6 +8,9 @@ const client = createClient({
   useCdn: false,
   apiVersion: '2023-05-03'
 });
+
+const builder = imageUrlBuilder(client);
+const urlFor = (source) => builder.image(source);
 
 // Test connection
 client.fetch('*[_type == "category"][0]')
@@ -20,9 +24,13 @@ const getCategories = async () => {
     slug,
     position,
     description,
-    "image": image.asset->url
+    image
   }`;
-  return await client.fetch(query);
+  const categories = await client.fetch(query);
+  return categories.map(cat => ({
+    ...cat,
+    image: cat.image ? urlFor(cat.image).width(400).height(300).url() : null
+  }));
 };
 
 const getMenuItems = async (filters = {}) => {
@@ -55,12 +63,17 @@ const getMenuItems = async (filters = {}) => {
     ingredients,
     allergens,
     nutritionInfo,
-    "image": image.asset->url,
-    "gallery": gallery[].asset->url,
+    image,
+    gallery,
     "category": category->{name, slug}
   }`;
   
-  return await client.fetch(query);
+  const items = await client.fetch(query);
+  return items.map(item => ({
+    ...item,
+    image: item.image ? urlFor(item.image).width(600).height(400).url() : null,
+    gallery: item.gallery ? item.gallery.map(img => urlFor(img).width(800).height(600).url()) : []
+  }));
 };
 
 const getMenuItem = async (slug) => {
@@ -79,11 +92,18 @@ const getMenuItem = async (slug) => {
     ingredients,
     allergens,
     nutritionInfo,
-    "image": image.asset->url,
-    "gallery": gallery[].asset->url,
+    image,
+    gallery,
     "category": category->{name, slug}
   }`;
-  return await client.fetch(query);
+  const item = await client.fetch(query);
+  if (!item) return null;
+  
+  return {
+    ...item,
+    image: item.image ? urlFor(item.image).width(800).height(600).url() : null,
+    gallery: item.gallery ? item.gallery.map(img => urlFor(img).width(1200).height(800).url()) : []
+  };
 };
 
 module.exports = {

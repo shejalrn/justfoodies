@@ -31,17 +31,13 @@ const Login = () => {
           
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium mb-1">Phone Number</label>
+              <label className="block text-sm font-medium mb-1">Phone Number or Email</label>
               <input
-                type="tel"
+                type="text"
                 className="input"
-                placeholder="Enter your phone number"
+                placeholder="Enter phone number or email"
                 {...register('phone', {
-                  required: 'Phone number is required',
-                  pattern: {
-                    value: /^[6-9]\d{9}$/,
-                    message: 'Please enter a valid Indian phone number'
-                  }
+                  required: 'Phone number or email is required'
                 })}
               />
               {errors.phone && (
