@@ -4,17 +4,23 @@ const bcrypt = require('bcryptjs');
 const prisma = new PrismaClient();
 
 async function main() {
-  // Create categories
-  const thaliCategory = await prisma.category.create({
-    data: { name: 'Thali', slug: 'thali', position: 1 }
+  // Create categories (upsert to handle existing data)
+  const thaliCategory = await prisma.category.upsert({
+    where: { slug: 'thali' },
+    update: {},
+    create: { name: 'Thali', slug: 'thali', position: 1 }
   });
 
-  const biryaniCategory = await prisma.category.create({
-    data: { name: 'Biryani', slug: 'biryani', position: 2 }
+  const biryaniCategory = await prisma.category.upsert({
+    where: { slug: 'biryani' },
+    update: {},
+    create: { name: 'Biryani', slug: 'biryani', position: 2 }
   });
 
-  const pgPackCategory = await prisma.category.create({
-    data: { name: 'PG Packs', slug: 'pg-packs', position: 3 }
+  const pgPackCategory = await prisma.category.upsert({
+    where: { slug: 'pg-packs' },
+    update: {},
+    create: { name: 'PG Packs', slug: 'pg-packs', position: 3 }
   });
 
   // Create menu items
@@ -77,10 +83,17 @@ async function main() {
     ]
   });
 
-  // Create admin user
+  // Create admin user (upsert to handle existing data)
   const adminPassword = await bcrypt.hash('Justfood@2025', 10);
-  await prisma.user.create({
-    data: {
+  await prisma.user.upsert({
+    where: { email: 'admin@justfoodies.in' },
+    update: {
+      name: 'Admin',
+      phone: '7038258837',
+      password: adminPassword,
+      role: 'ADMIN'
+    },
+    create: {
       name: 'Admin',
       phone: '7038258837',
       email: 'admin@justfoodies.in',
@@ -89,10 +102,17 @@ async function main() {
     }
   });
 
-  // Create test user
+  // Create test user (upsert to handle existing data)
   const userPassword = await bcrypt.hash('ranjeet123', 10);
-  await prisma.user.create({
-    data: {
+  await prisma.user.upsert({
+    where: { email: 'rajshejal22@gmail.com' },
+    update: {
+      name: 'Ranjeet Shejal',
+      phone: '9175231409',
+      password: userPassword,
+      role: 'USER'
+    },
+    create: {
       name: 'Ranjeet Shejal',
       phone: '9175231409',
       email: 'rajshejal22@gmail.com',
