@@ -333,5 +333,127 @@ export const special = {
   ]
 }
 
+export const blog = {
+  name: 'blog',
+  title: 'Blog Post',
+  type: 'document',
+  fields: [
+    {
+      name: 'title',
+      title: 'Title',
+      type: 'string',
+      validation: Rule => Rule.required()
+    },
+    {
+      name: 'slug',
+      title: 'Slug',
+      type: 'slug',
+      options: {
+        source: 'title',
+        maxLength: 96
+      },
+      validation: Rule => Rule.required()
+    },
+    {
+      name: 'excerpt',
+      title: 'Excerpt',
+      type: 'text',
+      rows: 3,
+      validation: Rule => Rule.required().max(200)
+    },
+    {
+      name: 'content',
+      title: 'Content',
+      type: 'array',
+      of: [
+        {
+          type: 'block'
+        },
+        {
+          type: 'image',
+          options: {
+            hotspot: true
+          }
+        }
+      ]
+    },
+    {
+      name: 'featuredImage',
+      title: 'Featured Image',
+      type: 'image',
+      options: {
+        hotspot: true
+      }
+    },
+    {
+      name: 'category',
+      title: 'Category',
+      type: 'string',
+      options: {
+        list: [
+          {title: 'Recipes', value: 'recipes'},
+          {title: 'Food Tips', value: 'food-tips'},
+          {title: 'Health & Nutrition', value: 'health-nutrition'},
+          {title: 'Company News', value: 'company-news'}
+        ]
+      }
+    },
+    {
+      name: 'tags',
+      title: 'Tags',
+      type: 'array',
+      of: [{type: 'string'}],
+      options: {
+        layout: 'tags'
+      }
+    },
+    {
+      name: 'author',
+      title: 'Author',
+      type: 'string',
+      initialValue: 'JustFoodies Team'
+    },
+    {
+      name: 'publishedAt',
+      title: 'Published At',
+      type: 'datetime',
+      initialValue: () => new Date().toISOString()
+    },
+    {
+      name: 'seo',
+      title: 'SEO',
+      type: 'object',
+      fields: [
+        {
+          name: 'metaTitle',
+          title: 'Meta Title',
+          type: 'string',
+          validation: Rule => Rule.max(60)
+        },
+        {
+          name: 'metaDescription',
+          title: 'Meta Description',
+          type: 'text',
+          rows: 3,
+          validation: Rule => Rule.max(160)
+        },
+        {
+          name: 'keywords',
+          title: 'Keywords',
+          type: 'array',
+          of: [{type: 'string'}]
+        }
+      ]
+    }
+  ],
+  preview: {
+    select: {
+      title: 'title',
+      media: 'featuredImage',
+      subtitle: 'category'
+    }
+  }
+}
+
 // Export schema types
-export const schemaTypes = [category, menuItem, addon, special]
+export const schemaTypes = [category, menuItem, addon, special, blog]

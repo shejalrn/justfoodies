@@ -1,6 +1,7 @@
 import { Routes, Route } from 'react-router-dom'
 import { AuthProvider } from './utils/AuthContext'
 import { CartProvider } from './utils/CartContext'
+import { HelmetProvider } from 'react-helmet-async'
 import Header from './components/Header'
 import Footer from './components/Footer'
 import Home from './pages/Home'
@@ -19,14 +20,17 @@ import TermsOfService from './pages/TermsOfService'
 import RefundPolicy from './pages/RefundPolicy'
 import ShippingPolicy from './pages/ShippingPolicy'
 import Admin from './pages/Admin'
+import Blog from './pages/Blog'
+import BlogPost from './pages/BlogPost'
 
 function App() {
   return (
-    <AuthProvider>
-      <CartProvider>
-        <div className="min-h-screen bg-background">
-          <Header />
-          <main>
+    <HelmetProvider>
+      <AuthProvider>
+        <CartProvider>
+          <div className="min-h-screen bg-background">
+            <Header />
+            <main>
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/menu" element={<Menu />} />
@@ -44,12 +48,15 @@ function App() {
               <Route path="/refund-policy" element={<RefundPolicy />} />
               <Route path="/shipping-policy" element={<ShippingPolicy />} />
               <Route path="/admin" element={<Admin />} />
+              <Route path="/blog" element={<Blog />} />
+              <Route path="/blog/:slug" element={<BlogPost />} />
             </Routes>
-          </main>
-          <Footer />
-        </div>
-      </CartProvider>
-    </AuthProvider>
+            </main>
+            <Footer />
+          </div>
+        </CartProvider>
+      </AuthProvider>
+    </HelmetProvider>
   )
 }
 

@@ -44,6 +44,13 @@ export default defineConfig({
                   .title('Special Offers')
                   .filter('_type == "special"')
               ),
+            S.listItem()
+              .title('Blog Posts')
+              .child(
+                S.documentTypeList('blog')
+                  .title('Blog Posts')
+                  .filter('_type == "blog"')
+              ),
           ])
     }),
     visionTool()

@@ -82,53 +82,58 @@ const Menu = () => {
           >
             All
           </button>
-          {categories?.map(category => (
-            <button
-              key={category._id}
-              onClick={() => setSelectedCategory(category.slug.current)}
-              className={`px-4 py-2 rounded-lg transition-colors ${
-                selectedCategory === category.slug.current 
-                  ? 'bg-primary text-white' 
-                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-              }`}
-            >
-              {category.name}
-            </button>
-          ))}
+          {categories?.map(category => {
+            const categorySlug = category.slug?.current || category.slug || category._id;
+            return (
+              <button
+                key={category._id}
+                onClick={() => setSelectedCategory(categorySlug)}
+                className={`px-4 py-2 rounded-lg transition-colors ${
+                  selectedCategory === categorySlug
+                    ? 'bg-primary text-white' 
+                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                }`}
+              >
+                {category.name}
+              </button>
+            );
+          })}
         </div>
       </div>
 
       {/* Menu Items */}
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {menuData?.items?.map(item => (
-          <div key={item._id} className="card">
-            <Link to={`/product/${item.slug.current}`}>
-              <div className="h-48 bg-gray-200 rounded-lg mb-4 cursor-pointer hover:opacity-90 transition-opacity">
-                {item.image ? (
-                  <img 
-                    src={item.image} 
-                    alt={item.title}
-                    className="w-full h-full object-cover rounded-lg"
-                    onError={(e) => {
-                      console.log('Image failed to load:', item.image);
-                      e.target.style.display = 'none';
-                      e.target.nextSibling.style.display = 'flex';
-                    }}
-                  />
-                ) : null}
-                <div className="w-full h-full flex items-center justify-center bg-gray-100 rounded-lg" style={{display: item.image ? 'none' : 'flex'}}>
-                  <div className="text-center text-gray-500">
-                    <div className="text-4xl mb-2">🍽️</div>
-                    <div className="text-sm">{item.title}</div>
+        {menuData?.items?.map(item => {
+          const itemSlug = item.slug?.current || item.slug || item._id;
+          return (
+            <div key={item._id} className="card">
+              <Link to={`/product/${itemSlug}`}>
+                <div className="h-48 bg-gray-200 rounded-lg mb-4 cursor-pointer hover:opacity-90 transition-opacity">
+                  {item.image ? (
+                    <img 
+                      src={item.image} 
+                      alt={item.title}
+                      className="w-full h-full object-cover rounded-lg"
+                      onError={(e) => {
+                        console.log('Image failed to load:', item.image);
+                        e.target.style.display = 'none';
+                        e.target.nextSibling.style.display = 'flex';
+                      }}
+                    />
+                  ) : null}
+                  <div className="w-full h-full flex items-center justify-center bg-gray-100 rounded-lg" style={{display: item.image ? 'none' : 'flex'}}>
+                    <div className="text-center text-gray-500">
+                      <div className="text-4xl mb-2">🍽️</div>
+                      <div className="text-sm">{item.title}</div>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </Link>
-            
-            <div className="flex justify-between items-start mb-2">
-              <Link to={`/product/${item.slug.current}`}>
-                <h3 className="text-xl font-semibold hover:text-primary cursor-pointer">{item.title}</h3>
               </Link>
+              
+              <div className="flex justify-between items-start mb-2">
+                <Link to={`/product/${itemSlug}`}>
+                  <h3 className="text-xl font-semibold hover:text-primary cursor-pointer">{item.title}</h3>
+                </Link>
               <span className={`px-2 py-1 rounded text-sm ${
                 item.isVeg 
                   ? 'bg-green-100 text-green-800' 
@@ -158,11 +163,12 @@ const Menu = () => {
               </button>
             </div>
             
-            {!item.isAvailable && (
-              <div className="mt-2 text-red-500 text-sm">Currently unavailable</div>
-            )}
-          </div>
-        ))}
+              {!item.isAvailable && (
+                <div className="mt-2 text-red-500 text-sm">Currently unavailable</div>
+              )}
+            </div>
+          );
+        })}
       </div>
 
       {menuData?.items?.length === 0 && (

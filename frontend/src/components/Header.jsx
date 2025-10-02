@@ -37,6 +37,9 @@ const Header = () => {
             <Link to="/contact" className="text-text hover:text-primary transition-colors">
               Contact
             </Link>
+            <Link to="/blog" className="text-text hover:text-primary transition-colors">
+              Blog
+            </Link>
           </nav>
 
           <div className="flex items-center space-x-4">

@@ -22,7 +22,7 @@ const Footer = () => {
               <a href="#" className="text-gray-300 hover:text-white transition-colors">
                 <Twitter size={20} />
               </a>
-              <a href="#" className="text-gray-300 hover:text-white transition-colors">
+              <a href="https://instagram.com/call_just_food" target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-white transition-colors">
                 <Instagram size={20} />
               </a>
             </div>
@@ -50,6 +50,11 @@ const Footer = () => {
               <li>
                 <Link to="/contact" className="text-gray-300 hover:text-white transition-colors">
                   Contact
+                </Link>
+              </li>
+              <li>
+                <Link to="/blog" className="text-gray-300 hover:text-white transition-colors">
+                  Blog
                 </Link>
               </li>
             </ul>
