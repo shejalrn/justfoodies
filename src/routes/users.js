@@ -16,7 +16,11 @@ router.post('/register', [
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
+      return res.status(400).json({ 
+        error: 'Validation failed', 
+        details: errors.array().map(err => err.msg).join(', '),
+        errors: errors.array() 
+      });
     }
 
     const { name, phone, email, password } = req.body;
@@ -69,7 +73,11 @@ router.post('/login', [
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
+      return res.status(400).json({ 
+        error: 'Validation failed', 
+        details: errors.array().map(err => err.msg).join(', '),
+        errors: errors.array() 
+      });
     }
 
     const { phone, password } = req.body;

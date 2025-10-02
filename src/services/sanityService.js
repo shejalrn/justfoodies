@@ -1,12 +1,17 @@
 const { createClient } = require('@sanity/client');
 
 const client = createClient({
-  projectId: process.env.SANITY_PROJECT_ID,
-  dataset: process.env.SANITY_DATASET,
+  projectId: process.env.SANITY_PROJECT_ID || 'ybaq07b6',
+  dataset: process.env.SANITY_DATASET || 'production',
   token: process.env.SANITY_TOKEN,
   useCdn: false,
   apiVersion: '2023-05-03'
 });
+
+// Test connection
+client.fetch('*[_type == "category"][0]')
+  .then(() => console.log('✅ Sanity connection successful'))
+  .catch(err => console.error('❌ Sanity connection failed:', err.message));
 
 const getCategories = async () => {
   const query = `*[_type == "category"] | order(position asc) {

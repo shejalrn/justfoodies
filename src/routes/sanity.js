@@ -46,4 +46,40 @@ router.get('/menu-items/:slug', async (req, res) => {
   }
 });
 
+// Test Sanity connection
+router.get('/test', async (req, res) => {
+  try {
+    const { createClient } = require('@sanity/client');
+    const client = createClient({
+      projectId: process.env.SANITY_PROJECT_ID || 'ybaq07b6',
+      dataset: process.env.SANITY_DATASET || 'production',
+      token: process.env.SANITY_TOKEN,
+      useCdn: false,
+      apiVersion: '2023-05-03'
+    });
+    
+    const result = await client.fetch('*[_type == "category"] | order(position asc)[0...3]');
+    res.json({ 
+      status: 'success', 
+      message: 'Sanity connection working',
+      sampleData: result,
+      config: {
+        projectId: process.env.SANITY_PROJECT_ID || 'ybaq07b6',
+        dataset: process.env.SANITY_DATASET || 'production',
+        hasToken: !!process.env.SANITY_TOKEN
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ 
+      status: 'error', 
+      message: error.message,
+      config: {
+        projectId: process.env.SANITY_PROJECT_ID || 'ybaq07b6',
+        dataset: process.env.SANITY_DATASET || 'production',
+        hasToken: !!process.env.SANITY_TOKEN
+      }
+    });
+  }
+});
+
 module.exports = router;
