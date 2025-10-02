@@ -32,13 +32,9 @@ const getCategories = async () => {
     slug,
     position,
     description,
-    image
+    "image": image.asset->url
   }`;
-  const categories = await client.fetch(query);
-  return categories.map(cat => ({
-    ...cat,
-    image: cat.image ? urlFor(cat.image)?.width(400).height(300).url() : null
-  }));
+  return await client.fetch(query);
 };
 
 const getMenuItems = async (filters = {}) => {
@@ -71,17 +67,12 @@ const getMenuItems = async (filters = {}) => {
     ingredients,
     allergens,
     nutritionInfo,
-    image,
-    gallery,
+    "image": image.asset->url,
+    "gallery": gallery[].asset->url,
     "category": category->{name, slug}
   }`;
   
-  const items = await client.fetch(query);
-  return items.map(item => ({
-    ...item,
-    image: item.image ? urlFor(item.image)?.width(600).height(400).url() : null,
-    gallery: item.gallery ? item.gallery.map(img => urlFor(img)?.width(800).height(600).url()).filter(Boolean) : []
-  }));
+  return await client.fetch(query);
 };
 
 const getMenuItem = async (slug) => {
@@ -100,18 +91,11 @@ const getMenuItem = async (slug) => {
     ingredients,
     allergens,
     nutritionInfo,
-    image,
-    gallery,
+    "image": image.asset->url,
+    "gallery": gallery[].asset->url,
     "category": category->{name, slug}
   }`;
-  const item = await client.fetch(query);
-  if (!item) return null;
-  
-  return {
-    ...item,
-    image: item.image ? urlFor(item.image)?.width(800).height(600).url() : null,
-    gallery: item.gallery ? item.gallery.map(img => urlFor(img)?.width(1200).height(800).url()).filter(Boolean) : []
-  };
+  return await client.fetch(query);
 };
 
 module.exports = {

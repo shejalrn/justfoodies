@@ -18,7 +18,9 @@ const Header = () => {
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           <Link to="/" className="flex items-center text-2xl font-bold text-primary">
-            <img src="/logo.png" alt="JustFoodies" className="h-8 w-8" />
+            <div className="h-8 w-8 bg-primary rounded-full flex items-center justify-center text-white font-bold text-sm">
+              JF
+            </div>
             <span className="ml-2 hidden sm:inline">JustFoodies</span>
           </Link>
 
@@ -78,14 +80,9 @@ const Header = () => {
                 </button>
               </div>
             ) : (
-              <div className="flex items-center space-x-2">
-                <Link to="/login" className="btn-primary">
-                  Login
-                </Link>
-                <Link to="/register" className="btn-secondary">
-                  Register
-                </Link>
-              </div>
+              <Link to="/login" className="btn-primary">
+                Login
+              </Link>
             )}
           </div>
         </div>

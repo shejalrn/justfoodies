@@ -77,6 +77,12 @@ const Login = () => {
               </Link>
             </p>
           </div>
+
+          <div className="text-center mt-4">
+            <Link to="/register" className="btn-secondary w-full">
+              Create New Account
+            </Link>
+          </div>
         </div>
       </div>
     </div>

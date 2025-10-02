@@ -104,15 +104,24 @@ const Menu = () => {
           <div key={item._id} className="card">
             <Link to={`/product/${item.slug.current}`}>
               <div className="h-48 bg-gray-200 rounded-lg mb-4 cursor-pointer hover:opacity-90 transition-opacity">
-                <img 
-                  src={item.image || '/placeholder.jpg'} 
-                  alt={item.title}
-                  className="w-full h-full object-cover rounded-lg"
-                  onError={(e) => {
-                    console.log('Image failed to load:', item.image);
-                    e.target.src = '/placeholder.jpg';
-                  }}
-                />
+                {item.image ? (
+                  <img 
+                    src={item.image} 
+                    alt={item.title}
+                    className="w-full h-full object-cover rounded-lg"
+                    onError={(e) => {
+                      console.log('Image failed to load:', item.image);
+                      e.target.style.display = 'none';
+                      e.target.nextSibling.style.display = 'flex';
+                    }}
+                  />
+                ) : null}
+                <div className="w-full h-full flex items-center justify-center bg-gray-100 rounded-lg" style={{display: item.image ? 'none' : 'flex'}}>
+                  <div className="text-center text-gray-500">
+                    <div className="text-4xl mb-2">🍽️</div>
+                    <div className="text-sm">{item.title}</div>
+                  </div>
+                </div>
               </div>
             </Link>
             
