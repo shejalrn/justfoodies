@@ -1,0 +1,137 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int       @id @default(autoincrement())
+  name      String
+  phone     String    @unique
+  email     String?   @unique
+  password  String?
+  role      String    @default("USER")
+  addresses Address[]
+  orders    Order[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@map("users")
+}
+
+model Address {
+  id      Int     @id @default(autoincrement())
+  userId  Int
+  label   String
+  line1   String
+  line2   String?
+  city    String
+  state   String
+  pincode String
+  phone   String
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  orders  Order[]
+
+  @@map("addresses")
+}
+
+model Category {
+  id        Int        @id @default(autoincrement())
+  name      String
+  slug      String     @unique
+  position  Int        @default(0)
+  menuItems MenuItem[]
+
+  @@map("categories")
+}
+
+model MenuItem {
+  id          Int         @id @default(autoincrement())
+  sku         String?     @unique
+  title       String
+  description String?     @db.Text
+  categoryId  Int?
+  price       Float
+  isVeg       Boolean     @default(true)
+  isAvailable Boolean     @default(true)
+  imageUrl    String?
+  category    Category?   @relation(fields: [categoryId], references: [id])
+  orderItems  OrderItem[]
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  @@map("menu_items")
+}
+
+model Order {
+  id            Int              @id @default(autoincrement())
+  orderNumber   String           @unique
+  userId        Int?
+  guestName     String?
+  guestPhone    String?
+  addressId     Int
+  totalAmount   Float
+  paymentStatus String           @default("PENDING")
+  paymentMethod String?
+  status        String           @default("PENDING")
+  meta          Json?
+  user          User?            @relation(fields: [userId], references: [id])
+  address       Address          @relation(fields: [addressId], references: [id])
+  items         OrderItem[]
+  statusLogs    OrderStatusLog[]
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id         Int      @id @default(autoincrement())
+  orderId    Int
+  menuItemId Int
+  title      String
+  qty        Int
+  unitPrice  Float
+  totalPrice Float
+  addons     Json?
+  order      Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  menuItem   MenuItem @relation(fields: [menuItemId], references: [id])
+
+  @@map("order_items")
+}
+
+model OrderStatusLog {
+  id        Int      @id @default(autoincrement())
+  orderId   Int
+  status    String
+  note      String?
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@map("order_status_logs")
+}
+
+model Coupon {
+  id             Int      @id @default(autoincrement())
+  code           String   @unique
+  type           String
+  value          Float
+  minOrderAmount Float    @default(0)
+  expiry         DateTime
+  usageLimit     Int      @default(1)
+  active         Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@map("coupons")
+}
+
+model Setting {
+  key   String @id
+  value String @db.Text
+
+  @@map("settings")
+}
