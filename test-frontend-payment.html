@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Razorpay</title>
+</head>
+<body>
+    <h1>Test Razorpay Payment</h1>
+    <button onclick="testPayment()">Test Payment Creation</button>
+    <button onclick="testRazorpay()">Test Razorpay Gateway</button>
+    
+    <div id="result"></div>
+    
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <script>
+        async function testPayment() {
+            try {
+                console.log('Testing payment creation...');
+                const response = await fetch('/api/orders/create-payment', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        amount: 100,
+                        orderNumber: 'TEST123'
+                    })
+                });
+                
+                const data = await response.json();
+                console.log('Payment creation response:', data);
+                document.getElementById('result').innerHTML = '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('result').innerHTML = 'Error: ' + error.message;
+            }
+        }
+        
+        async function testRazorpay() {
+            try {
+                console.log('Testing Razorpay gateway...');
+                console.log('Razorpay available:', !!window.Razorpay);
+                
+                if (!window.Razorpay) {
+                    throw new Error('Razorpay not loaded');
+                }
+                
+                const response = await fetch('/api/orders/create-payment', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        amount: 100,
+                        orderNumber: 'TEST123'
+                    })
+                });
+                
+                const data = await response.json();
+                console.log('Payment data:', data);
+                
+                const options = {
+                    key: data.key,
+                    amount: data.amount,
+                    currency: data.currency,
+                    name: 'JustFoodies Test',
+                    description: 'Test Payment',
+                    order_id: data.id,
+                    handler: function (response) {
+                        console.log('Payment success:', response);
+                        alert('Payment successful!');
+                    },
+                    modal: {
+                        ondismiss: function() {
+                            console.log('Payment cancelled');
+                            alert('Payment cancelled');
+                        }
+                    }
+                };
+                
+                const rzp = new Razorpay(options);
+                rzp.open();
+                
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error: ' + error.message);
+            }
+        }
+    </script>
+</body>
+</html>

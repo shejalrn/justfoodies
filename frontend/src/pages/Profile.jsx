@@ -8,21 +8,26 @@ const Profile = () => {
   const { user } = useAuth()
   const [activeTab, setActiveTab] = useState('profile')
 
-  const { data: orders } = useQuery(
+  const { data: ordersData, isLoading: ordersLoading, error: ordersError } = useQuery(
     'user-orders',
     () => api.get('/api/orders/user/orders').then(res => res.data),
     {
-      enabled: !!user
+      enabled: !!user,
+      retry: 1
     }
   )
 
-  const { data: addresses } = useQuery(
+  const { data: addresses, isLoading: addressesLoading } = useQuery(
     'user-addresses',
     () => api.get('/api/users/addresses').then(res => res.data),
     {
-      enabled: !!user
+      enabled: !!user,
+      retry: 1
     }
   )
+
+  // Extract orders array from response
+  const orders = ordersData?.orders || []
 
   if (!user) {
     return (
@@ -104,8 +109,22 @@ const Profile = () => {
         {/* Orders Tab */}
         {activeTab === 'orders' && (
           <div className="space-y-4">
-            {orders?.orders?.length > 0 ? (
-              orders.orders.map(order => (
+            {ordersLoading ? (
+              <div className="card text-center">
+                <p>Loading orders...</p>
+              </div>
+            ) : ordersError ? (
+              <div className="card text-center">
+                <p className="text-red-500">Error loading orders: {ordersError.message}</p>
+                <button 
+                  onClick={() => window.location.reload()}
+                  className="btn-primary mt-4"
+                >
+                  Retry
+                </button>
+              </div>
+            ) : orders?.length > 0 ? (
+              orders.map(order => (
                 <div key={order.id} className="card">
                   <div className="flex justify-between items-start mb-4">
                     <div>
@@ -160,7 +179,11 @@ const Profile = () => {
         {/* Addresses Tab */}
         {activeTab === 'addresses' && (
           <div className="space-y-4">
-            {addresses?.length > 0 ? (
+            {addressesLoading ? (
+              <div className="card text-center">
+                <p>Loading addresses...</p>
+              </div>
+            ) : addresses?.length > 0 ? (
               addresses.map(address => (
                 <div key={address.id} className="card">
                   <div className="flex justify-between items-start">

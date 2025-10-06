@@ -9,7 +9,7 @@ import toast from 'react-hot-toast'
 const ProductDetail = () => {
   const { slug } = useParams()
   const navigate = useNavigate()
-  const { addItem } = useCart()
+  const { addItem, getTotalItems } = useCart()
   const [quantity, setQuantity] = useState(1)
 
   const { data: item, isLoading } = useQuery(
@@ -19,14 +19,35 @@ const ProductDetail = () => {
 
   const handleAddToCart = () => {
     if (item) {
-      addItem({
+      const success = addItem({
         id: item._id,
         title: item.title,
         price: item.price,
         image: item.image,
         isVeg: item.isVeg
       }, quantity)
-      toast.success(`${item.title} added to cart!`)
+      
+      if (success) {
+        toast.success(
+          (t) => (
+            <div className="flex items-center justify-between w-full">
+              <span>{quantity}x {item.title} added to cart</span>
+              <button
+                onClick={() => {
+                  toast.dismiss(t.id)
+                  navigate('/cart')
+                }}
+                className="bg-white text-primary px-2 py-1 rounded text-xs font-medium ml-3"
+              >
+                View Cart ({getTotalItems()})
+              </button>
+            </div>
+          ),
+          {
+            duration: 4000
+          }
+        )
+      }
     }
   }
 

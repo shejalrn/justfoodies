@@ -76,6 +76,9 @@ model Order {
   totalAmount   Float
   paymentStatus String           @default("PENDING")
   paymentMethod String?
+  razorpayOrderId String?
+  razorpayPaymentId String?
+  razorpaySignature String?
   status        String           @default("PENDING")
   meta          Json?
   user          User?            @relation(fields: [userId], references: [id])

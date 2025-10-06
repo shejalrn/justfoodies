@@ -1,16 +1,40 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { Minus, Plus, Trash2 } from 'lucide-react'
 import { useCart } from '../utils/CartContext'
 import { useAuth } from '../utils/AuthContext'
+import { useQuery } from 'react-query'
 import api from '../utils/api'
 import toast from 'react-hot-toast'
+import SimpleRazorpay from '../components/SimpleRazorpay'
 
 const Cart = () => {
-  const { items, updateQuantity, removeItem, clearCart, getTotalPrice } = useCart()
+  const { items, updateQuantity, removeItem, clearCart, getTotalPrice, addItem } = useCart()
   const { user } = useAuth()
   const navigate = useNavigate()
   const [loading, setLoading] = useState(false)
+
+  // Get suggested products (popular items not in cart)
+  const { data: suggestedProducts } = useQuery(
+    ['suggested-products', items.map(item => item.id)],
+    () => api.get('/api/sanity/menu-items?limit=6').then(res => {
+      const allItems = res.data.items || []
+      const cartItemIds = items.map(item => item.id)
+      return allItems.filter(item => !cartItemIds.includes(item._id)).slice(0, 4)
+    }),
+    { enabled: true }
+  )
+
+  const handleAddSuggested = (item) => {
+    addItem({
+      id: item._id,
+      title: item.title,
+      price: item.price,
+      image: item.image,
+      isVeg: item.isVeg
+    })
+    toast.success(`${item.title} added to cart`)
+  }
   const [address, setAddress] = useState({
     line1: '',
     line2: '',
@@ -23,6 +47,8 @@ const Cart = () => {
     name: '',
     phone: ''
   })
+  const [paymentMethod, setPaymentMethod] = useState('ONLINE')
+  const [currentOrder, setCurrentOrder] = useState(null)
 
   const handlePlaceOrder = async () => {
     if (items.length === 0) {
@@ -51,7 +77,7 @@ const Cart = () => {
           isVeg: item.isVeg
         })),
         address,
-        paymentMethod: 'CASH'
+        paymentMethod: 'ONLINE'
       }
 
       if (!user) {
@@ -59,14 +85,20 @@ const Cart = () => {
         orderData.guestPhone = guestInfo.phone
       }
 
+      console.log('Sending order data:', orderData)
       const response = await api.post('/api/orders', orderData)
       const order = response.data
+      console.log('Order created response:', order)
 
-      clearCart()
-      toast.success('Order placed successfully!')
-      navigate(`/track/${order.orderNumber}`)
+      console.log('Setting current order for payment:', order)
+      setCurrentOrder(order)
+      toast.success('Order created! Proceeding to payment...')
     } catch (error) {
-      toast.error(error.response?.data?.error || 'Failed to place order')
+      console.error('Order placement error:', error)
+      console.error('Error response:', error.response?.data)
+      console.error('Error status:', error.response?.status)
+      const errorMessage = error.response?.data?.error || error.response?.data?.errors?.[0]?.msg || error.message || 'Failed to place order'
+      toast.error(errorMessage)
     } finally {
       setLoading(false)
     }
@@ -75,7 +107,7 @@ const Cart = () => {
   if (items.length === 0) {
     return (
       <div className="container mx-auto px-4 py-8">
-        <div className="text-center">
+        <div className="text-center mb-12">
           <h1 className="text-3xl font-bold mb-4">Your Cart</h1>
           <p className="text-gray-500 mb-8">Your cart is empty</p>
           <button 
@@ -85,6 +117,47 @@ const Cart = () => {
             Browse Menu
           </button>
         </div>
+        
+        {/* Suggested Products for Empty Cart */}
+        {suggestedProducts && suggestedProducts.length > 0 && (
+          <div>
+            <h2 className="text-2xl font-bold mb-6 text-center">Popular Items</h2>
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {suggestedProducts.map(item => {
+                const itemSlug = item.slug?.current || item.slug || item._id
+                return (
+                  <div key={item._id} className="card">
+                    <Link to={`/product/${itemSlug}`}>
+                      <div className="h-32 bg-gray-200 rounded-lg mb-3">
+                        {item.image ? (
+                          <img 
+                            src={item.image} 
+                            alt={item.title}
+                            className="w-full h-full object-cover rounded-lg"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-gray-400">
+                            🍽️
+                          </div>
+                        )}
+                      </div>
+                    </Link>
+                    <h3 className="font-semibold text-sm mb-1">{item.title}</h3>
+                    <div className="flex justify-between items-center">
+                      <span className="font-bold text-primary">₹{item.price}</span>
+                      <button
+                        onClick={() => handleAddSuggested(item)}
+                        className="btn-primary text-sm px-3 py-1"
+                      >
+                        Add
+                      </button>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        )}
       </div>
     )
   }
@@ -93,13 +166,13 @@ const Cart = () => {
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-8">Your Cart</h1>
 
-      <div className="grid lg:grid-cols-3 gap-8">
+      <div className="grid lg:grid-cols-4 gap-8">
         {/* Cart Items */}
-        <div className="lg:col-span-2">
-          <div className="space-y-4">
+        <div className="lg:col-span-3">
+          <div className="space-y-3">
             {items.map(item => (
-              <div key={item.id} className="card flex items-center space-x-4">
-                <div className="w-20 h-20 bg-gray-200 rounded-lg flex-shrink-0">
+              <div key={item.id} className="bg-white border rounded-lg p-4 flex items-center space-x-4">
+                <div className="w-16 h-16 bg-gray-200 rounded-lg flex-shrink-0">
                   {item.image ? (
                     <img 
                       src={item.image} 
@@ -108,63 +181,110 @@ const Cart = () => {
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">
-                      No Image
+                      🍽️
                     </div>
                   )}
                 </div>
                 
                 <div className="flex-1">
-                  <h3 className="font-semibold">{item.title}</h3>
-                  <p className="text-gray-600">₹{item.price}</p>
+                  <h3 className="font-medium text-sm">{item.title}</h3>
+                  <p className="text-gray-500 text-sm">₹{item.price}</p>
                 </div>
                 
                 <div className="flex items-center space-x-2">
                   <button
                     onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                    className="p-1 rounded-full bg-gray-200 hover:bg-gray-300"
+                    className="w-8 h-8 rounded-full border border-primary text-primary hover:bg-primary hover:text-white flex items-center justify-center"
                   >
-                    <Minus size={16} />
+                    <Minus size={14} />
                   </button>
-                  <span className="w-8 text-center">{item.quantity}</span>
+                  <span className="w-8 text-center text-sm font-medium">{item.quantity}</span>
                   <button
                     onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                    className="p-1 rounded-full bg-gray-200 hover:bg-gray-300"
+                    className="w-8 h-8 rounded-full bg-primary text-white hover:bg-primary/80 flex items-center justify-center"
                   >
-                    <Plus size={16} />
+                    <Plus size={14} />
                   </button>
                 </div>
                 
                 <div className="text-right">
-                  <p className="font-semibold">₹{item.price * item.quantity}</p>
+                  <p className="font-semibold text-sm">₹{item.price * item.quantity}</p>
                   <button
                     onClick={() => removeItem(item.id)}
                     className="text-red-500 hover:text-red-700 mt-1"
                   >
-                    <Trash2 size={16} />
+                    <Trash2 size={14} />
                   </button>
                 </div>
               </div>
             ))}
           </div>
+          
+          {/* Add More Items Section */}
+          {suggestedProducts && suggestedProducts.length > 0 && (
+            <div className="mt-8">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-semibold">Add more items</h2>
+                <button 
+                  onClick={() => navigate('/menu')}
+                  className="text-primary text-sm hover:underline"
+                >
+                  View all
+                </button>
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {suggestedProducts.map(item => {
+                  const itemSlug = item.slug?.current || item.slug || item._id
+                  return (
+                    <div key={item._id} className="bg-white border rounded-lg p-3">
+                      <div className="h-24 bg-gray-100 rounded-lg mb-2">
+                        {item.image ? (
+                          <img 
+                            src={item.image} 
+                            alt={item.title}
+                            className="w-full h-full object-cover rounded-lg"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-gray-400">
+                            🍽️
+                          </div>
+                        )}
+                      </div>
+                      <h3 className="font-medium text-xs mb-1 line-clamp-2">{item.title}</h3>
+                      <div className="flex items-center justify-between">
+                        <span className="font-semibold text-sm text-primary">₹{item.price}</span>
+                        <button
+                          onClick={() => handleAddSuggested(item)}
+                          className="bg-primary text-white px-2 py-1 rounded text-xs font-medium hover:bg-primary/80"
+                        >
+                          ADD
+                        </button>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          )}
         </div>
 
-        {/* Order Summary & Checkout */}
-        <div className="space-y-6">
+        {/* Order Summary & Checkout - Sticky Sidebar */}
+        <div className="lg:sticky lg:top-24 lg:h-fit space-y-4">
           {/* Order Summary */}
-          <div className="card">
-            <h3 className="text-xl font-semibold mb-4">Order Summary</h3>
-            <div className="space-y-2">
+          <div className="bg-white border rounded-lg p-4">
+            <h3 className="font-semibold mb-3">Bill Details</h3>
+            <div className="space-y-2 text-sm">
               <div className="flex justify-between">
-                <span>Subtotal</span>
+                <span>Item total</span>
                 <span>₹{getTotalPrice()}</span>
               </div>
-              <div className="flex justify-between">
-                <span>Delivery Fee</span>
-                <span>₹0</span>
+              <div className="flex justify-between text-green-600">
+                <span>Delivery fee</span>
+                <span>FREE</span>
               </div>
-              <hr />
-              <div className="flex justify-between font-semibold text-lg">
-                <span>Total</span>
+              <hr className="my-2" />
+              <div className="flex justify-between font-semibold">
+                <span>Grand Total</span>
                 <span>₹{getTotalPrice()}</span>
               </div>
             </div>
@@ -172,20 +292,20 @@ const Cart = () => {
 
           {/* Guest Info */}
           {!user && (
-            <div className="card">
-              <h3 className="text-xl font-semibold mb-4">Your Details</h3>
-              <div className="space-y-4">
+            <div className="bg-white border rounded-lg p-4">
+              <h3 className="font-semibold mb-3">Your Details</h3>
+              <div className="space-y-3">
                 <input
                   type="text"
                   placeholder="Full Name"
-                  className="input"
+                  className="w-full px-3 py-2 border rounded-lg text-sm"
                   value={guestInfo.name}
                   onChange={(e) => setGuestInfo(prev => ({ ...prev, name: e.target.value }))}
                 />
                 <input
                   type="tel"
                   placeholder="Phone Number"
-                  className="input"
+                  className="w-full px-3 py-2 border rounded-lg text-sm"
                   value={guestInfo.phone}
                   onChange={(e) => setGuestInfo(prev => ({ ...prev, phone: e.target.value }))}
                 />
@@ -194,51 +314,51 @@ const Cart = () => {
           )}
 
           {/* Delivery Address */}
-          <div className="card">
-            <h3 className="text-xl font-semibold mb-4">Delivery Address</h3>
-            <div className="space-y-4">
+          <div className="bg-white border rounded-lg p-4">
+            <h3 className="font-semibold mb-3">Delivery Address</h3>
+            <div className="space-y-3">
               <input
                 type="text"
                 placeholder="Address Line 1"
-                className="input"
+                className="w-full px-3 py-2 border rounded-lg text-sm"
                 value={address.line1}
                 onChange={(e) => setAddress(prev => ({ ...prev, line1: e.target.value }))}
               />
               <input
                 type="text"
                 placeholder="Address Line 2 (Optional)"
-                className="input"
+                className="w-full px-3 py-2 border rounded-lg text-sm"
                 value={address.line2}
                 onChange={(e) => setAddress(prev => ({ ...prev, line2: e.target.value }))}
               />
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-2">
                 <input
                   type="text"
                   placeholder="City"
-                  className="input"
+                  className="w-full px-3 py-2 border rounded-lg text-sm"
                   value={address.city}
                   onChange={(e) => setAddress(prev => ({ ...prev, city: e.target.value }))}
                 />
                 <input
                   type="text"
                   placeholder="State"
-                  className="input"
+                  className="w-full px-3 py-2 border rounded-lg text-sm"
                   value={address.state}
                   onChange={(e) => setAddress(prev => ({ ...prev, state: e.target.value }))}
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-2">
                 <input
                   type="text"
                   placeholder="Pincode"
-                  className="input"
+                  className="w-full px-3 py-2 border rounded-lg text-sm"
                   value={address.pincode}
                   onChange={(e) => setAddress(prev => ({ ...prev, pincode: e.target.value }))}
                 />
                 <input
                   type="tel"
                   placeholder="Phone"
-                  className="input"
+                  className="w-full px-3 py-2 border rounded-lg text-sm"
                   value={address.phone}
                   onChange={(e) => setAddress(prev => ({ ...prev, phone: e.target.value }))}
                 />
@@ -246,15 +366,54 @@ const Cart = () => {
             </div>
           </div>
 
-          <button
-            onClick={handlePlaceOrder}
-            disabled={loading}
-            className="btn-primary w-full"
-          >
-            {loading ? 'Placing Order...' : 'Place Order'}
-          </button>
+          {/* Payment Method */}
+          <div className="bg-white border rounded-lg p-4">
+            <h3 className="font-semibold mb-3">Payment</h3>
+            <div className="bg-primary/5 p-3 rounded-lg">
+              <div className="flex items-center space-x-2">
+                <input
+                  type="radio"
+                  name="payment"
+                  value="ONLINE"
+                  checked={true}
+                  readOnly
+                  className="text-primary"
+                />
+                <span className="text-sm font-medium">Pay Online</span>
+              </div>
+              <p className="text-xs text-gray-600 mt-1">Secure payment via Razorpay</p>
+            </div>
+          </div>
+
+
+
+          {currentOrder ? (
+            <SimpleRazorpay
+              order={currentOrder}
+              onSuccess={(response) => {
+                toast.success('Payment completed successfully')
+                clearCart()
+                navigate(`/track/${currentOrder.orderNumber}`)
+              }}
+              onError={(error) => {
+                toast.error(`Payment failed: ${error.message || 'Unknown error'}`)
+                setCurrentOrder(null)
+              }}
+              autoOpen={true}
+            />
+          ) : (
+            <button
+              onClick={handlePlaceOrder}
+              disabled={loading}
+              className="w-full bg-primary text-white py-3 rounded-lg font-medium hover:bg-primary/90 disabled:opacity-50"
+            >
+              {loading ? 'Creating Order...' : `Pay ₹${getTotalPrice()}`}
+            </button>
+          )}
         </div>
       </div>
+
+
     </div>
   )
 }

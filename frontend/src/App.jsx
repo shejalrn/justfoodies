@@ -22,6 +22,7 @@ import ShippingPolicy from './pages/ShippingPolicy'
 import Admin from './pages/Admin'
 import Blog from './pages/Blog'
 import BlogPost from './pages/BlogPost'
+import RazorpayDebug from './components/RazorpayDebug'
 
 function App() {
   return (
@@ -50,6 +51,7 @@ function App() {
               <Route path="/admin" element={<Admin />} />
               <Route path="/blog" element={<Blog />} />
               <Route path="/blog/:slug" element={<BlogPost />} />
+              <Route path="/debug/razorpay" element={<RazorpayDebug />} />
             </Routes>
             </main>
             <Footer />

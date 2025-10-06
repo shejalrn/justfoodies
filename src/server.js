@@ -31,14 +31,14 @@ app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "'unsafe-inline'", "https://static.cloudflareinsights.com", "https://www.googletagmanager.com", "https://www.google-analytics.com"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://checkout.razorpay.com", "https://static.cloudflareinsights.com", "https://www.googletagmanager.com", "https://www.google-analytics.com"],
       styleSrc: ["'self'", "'unsafe-inline'"],
       imgSrc: ["'self'", "data:", "https:", "http:"],
-      connectSrc: ["'self'", "https:", "wss:", "https://www.google-analytics.com", "https://analytics.google.com"],
+      connectSrc: ["'self'", "https:", "wss:", "https://api.razorpay.com", "https://www.google-analytics.com", "https://analytics.google.com"],
       fontSrc: ["'self'", "https:", "data:"],
       objectSrc: ["'none'"],
       mediaSrc: ["'self'"],
-      frameSrc: ["'none'"]
+      frameSrc: ["'self'", "https://api.razorpay.com", "https://checkout.razorpay.com"]
     }
   }
 }));
@@ -60,6 +60,13 @@ app.use(express.urlencoded({ extended: true }));
 
 // Serve static files from frontend build
 app.use(express.static('frontend/dist'));
+
+// Add specific headers for Razorpay
+app.use((req, res, next) => {
+  res.setHeader('Cross-Origin-Embedder-Policy', 'unsafe-none');
+  res.setHeader('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
+  next();
+});
 
 // Make io available to routes
 app.use((req, res, next) => {

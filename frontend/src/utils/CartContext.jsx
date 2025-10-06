@@ -38,6 +38,7 @@ export const CartProvider = ({ children }) => {
       
       return [...prev, { ...menuItem, quantity }]
     })
+    return true // Return success indicator
   }
 
   const removeItem = (itemId) => {

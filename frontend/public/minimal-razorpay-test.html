@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minimal Razorpay Test</title>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+</head>
+<body>
+    <h1>Minimal Razorpay Test</h1>
+    <button id="payBtn">Test Payment with Backend</button>
+    <div id="logs" style="margin-top: 20px; padding: 10px; background: #f0f0f0; font-family: monospace;"></div>
+
+    <script>
+        const logs = document.getElementById('logs');
+        
+        function log(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            logs.innerHTML += `[${timestamp}] ${message}<br>`;
+            console.log(message);
+        }
+
+        async function testPayment() {
+            log('Starting payment test...');
+            
+            try {
+                // Step 1: Create order via backend
+                log('Creating order via backend...');
+                const response = await fetch('http://localhost:3000/api/orders/create-payment', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        amount: 100,
+                        orderNumber: `TEST_${Date.now()}`
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const orderData = await response.json();
+                log(`Order created: ${orderData.id}`);
+                log(`Amount: ${orderData.amount}, Key: ${orderData.key}`);
+
+                // Step 2: Check Razorpay availability
+                if (!window.Razorpay) {
+                    throw new Error('Razorpay not loaded');
+                }
+                log('Razorpay script loaded successfully');
+
+                // Step 3: Initialize payment
+                const options = {
+                    key: orderData.key,
+                    amount: orderData.amount,
+                    currency: orderData.currency,
+                    name: 'JustFoodies Test',
+                    description: 'Test Payment',
+                    order_id: orderData.id,
+                    handler: function (response) {
+                        log(`Payment Success: ${response.razorpay_payment_id}`);
+                        log(`Order ID: ${response.razorpay_order_id}`);
+                        log(`Signature: ${response.razorpay_signature}`);
+                        alert('Payment successful!');
+                    },
+                    prefill: {
+                        name: 'Test User',
+                        email: 'test@justfoodie.com',
+                        contact: '9999999999'
+                    },
+                    theme: {
+                        color: '#4BA3A8'
+                    },
+                    modal: {
+                        ondismiss: function() {
+                            log('Payment modal dismissed');
+                        }
+                    }
+                };
+
+                log('Opening Razorpay checkout...');
+                const rzp = new Razorpay(options);
+                
+                rzp.on('payment.failed', function (response) {
+                    log(`Payment Failed: ${response.error.code} - ${response.error.description}`);
+                    alert(`Payment failed: ${response.error.description}`);
+                });
+                
+                rzp.open();
+                log('Razorpay checkout opened');
+
+            } catch (error) {
+                log(`Error: ${error.message}`);
+                console.error('Full error:', error);
+            }
+        }
+
+        document.getElementById('payBtn').addEventListener('click', testPayment);
+        
+        // Initial checks
+        log(`Razorpay available: ${!!window.Razorpay}`);
+        log('Ready for testing');
+    </script>
+</body>
+</html>

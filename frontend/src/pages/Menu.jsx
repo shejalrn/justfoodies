@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useQuery } from 'react-query'
-import { Plus, Search, Filter } from 'lucide-react'
-import { Link } from 'react-router-dom'
+import { Plus, Search, Filter, ShoppingCart } from 'lucide-react'
+import { Link, useNavigate } from 'react-router-dom'
 import api from '../utils/api'
 import { useCart } from '../utils/CartContext'
 import toast from 'react-hot-toast'
@@ -11,7 +11,8 @@ const Menu = () => {
   const [selectedCategory, setSelectedCategory] = useState('')
   const [isVegOnly, setIsVegOnly] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
-  const { addItem } = useCart()
+  const { addItem, getTotalItems } = useCart()
+  const navigate = useNavigate()
 
   const { data: categories } = useQuery('sanity-categories', () =>
     api.get('/api/sanity/categories').then(res => res.data)
@@ -30,8 +31,28 @@ const Menu = () => {
   )
 
   const handleAddToCart = (item) => {
-    addItem(item)
-    toast.success(`${item.title} added to cart!`)
+    const success = addItem(item)
+    if (success) {
+      toast.success(
+        (t) => (
+          <div className="flex items-center justify-between w-full">
+            <span>{item.title} added to cart</span>
+            <button
+              onClick={() => {
+                toast.dismiss(t.id)
+                navigate('/cart')
+              }}
+              className="bg-white text-primary px-2 py-1 rounded text-xs font-medium ml-3"
+            >
+              View Cart ({getTotalItems()})
+            </button>
+          </div>
+        ),
+        {
+          duration: 4000
+        }
+      )
+    }
   }
 
   if (isLoading) {

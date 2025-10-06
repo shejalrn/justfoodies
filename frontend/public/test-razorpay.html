@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Razorpay</title>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+</head>
+<body>
+    <h1>Test Razorpay Integration</h1>
+    <button onclick="testPayment()">Test Payment</button>
+    
+    <script>
+        function testPayment() {
+            console.log('Testing Razorpay...');
+            console.log('Razorpay available:', !!window.Razorpay);
+            
+            if (!window.Razorpay) {
+                alert('Razorpay not loaded');
+                return;
+            }
+            
+            // Test with live key
+            const options = {
+                key: 'rzp_live_ROccrd90bR8W9i',
+                amount: 10000, // 100 INR in paise
+                currency: 'INR',
+                name: 'JustFoodies Test',
+                description: 'Test Payment',
+                order_id: 'order_test_123',
+                handler: function (response) {
+                    console.log('Payment success:', response);
+                    alert('Payment successful: ' + response.razorpay_payment_id);
+                },
+                prefill: {
+                    name: 'Test User',
+                    email: 'test@example.com',
+                    contact: '9876543210'
+                },
+                theme: {
+                    color: '#4BA3A8'
+                }
+            };
+            
+            const razorpay = new Razorpay(options);
+            razorpay.on('payment.failed', function (response) {
+                console.error('Payment failed:', response.error);
+                alert('Payment failed: ' + response.error.description);
+            });
+            
+            razorpay.open();
+        }
+    </script>
+</body>
+</html>
