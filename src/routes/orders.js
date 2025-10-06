@@ -25,6 +25,15 @@ router.post('/', [
     console.log('=== ORDER CREATION DEBUG ===');
     console.log('Request body:', JSON.stringify(req.body, null, 2));
     
+    // Test database connection
+    try {
+      await prisma.$queryRaw`SELECT 1`;
+      console.log('Database connection: OK');
+    } catch (dbError) {
+      console.error('Database connection failed:', dbError);
+      throw new Error('Database connection failed: ' + dbError.message);
+    }
+    
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       console.log('Validation errors:', errors.array());
@@ -45,34 +54,50 @@ router.post('/', [
 
     // Create or find menu items in database
     for (const item of items) {
+      console.log('Processing item:', item.id, item.title);
+      
       let dbMenuItem = await prisma.menuItem.findFirst({
         where: { sku: item.id }
       });
       
       if (!dbMenuItem) {
+        console.log('Creating new menu item:', item.id);
         // Create new menu item in database
         dbMenuItem = await prisma.menuItem.create({
           data: {
             sku: item.id,
             title: item.title,
             description: item.title,
-            price: item.price,
+            price: parseFloat(item.price),
             isVeg: item.isVeg || true,
             isAvailable: true
           }
         });
+        console.log('Menu item created:', dbMenuItem.id);
+      } else {
+        console.log('Found existing menu item:', dbMenuItem.id);
       }
       
-      const itemTotal = item.price * item.qty;
+      const unitPrice = parseFloat(item.price);
+      const quantity = parseInt(item.qty);
+      const itemTotal = unitPrice * quantity;
       totalAmount += itemTotal;
       
       orderItems.push({
         menuItemId: dbMenuItem.id,
         title: item.title,
-        qty: item.qty,
-        unitPrice: item.price,
+        qty: quantity,
+        unitPrice: unitPrice,
         totalPrice: itemTotal,
         addons: item.addons || null
+      });
+      
+      console.log('Order item processed:', {
+        menuItemId: dbMenuItem.id,
+        title: item.title,
+        qty: quantity,
+        unitPrice: unitPrice,
+        totalPrice: itemTotal
       });
     }
 
@@ -134,7 +159,17 @@ router.post('/', [
 
   } catch (error) {
     console.error('Order creation error:', error);
-    res.status(500).json({ error: 'Failed to create order' });
+    console.error('Error stack:', error.stack);
+    console.error('Error details:', {
+      message: error.message,
+      code: error.code,
+      meta: error.meta
+    });
+    res.status(500).json({ 
+      error: 'Failed to create order',
+      details: error.message,
+      code: error.code
+    });
   }
 });
 
